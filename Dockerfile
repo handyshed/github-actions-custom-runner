@@ -24,10 +24,10 @@ RUN apt-get update && \
 # The actual browser binaries will be installed by each project's Playwright version
 RUN npx -y playwright install-deps
 
+# Create workspace directory with correct permissions before switching user
+RUN mkdir -p /workspace && chown ciuser:ciuser /workspace
+
 # Set user and working directory
 USER ciuser
 WORKDIR /workspace
 ENV HOME=/home/ciuser
-
-# Ensure the workspace directory exists and has correct permissions
-RUN sudo mkdir -p /workspace && sudo chown ciuser:ciuser /workspace
