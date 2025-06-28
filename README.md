@@ -41,6 +41,17 @@ const runnerUser = new aws.iam.User("runner", {
 - **Working Directory**: `/workspace`
 - **Home Directory**: `/home/ciuser`
 
+## Package Visibility
+
+The Docker image is hosted on GitHub Container Registry (GHCR). Since this is a public repository, the package should automatically be public. If you encounter access issues:
+
+1. The package owner needs to set it to public once (this is a one-time setup)
+2. Go to: https://github.com/handyshed/github-actions-custom-runner/pkgs/container/github-actions-runner
+3. Click "Package settings" 
+4. Change visibility to "Public"
+
+After this initial setup, the package will remain public.
+
 ## Usage
 
 ### In GitHub Actions Workflows
