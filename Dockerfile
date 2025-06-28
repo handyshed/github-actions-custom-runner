@@ -1,5 +1,9 @@
 FROM ghcr.io/catthehacker/ubuntu:act-22.04
 
+# Label to automatically link package to this repository
+LABEL org.opencontainers.image.source="https://github.com/handyshed/github-actions-custom-runner"
+LABEL org.opencontainers.image.description="Custom GitHub Actions runner with pre-installed Playwright dependencies"
+
 # Create user with UID 10001 (high enough to avoid conflicts with system users)
 ARG USER_UID=10001
 ARG USER_GID=10001
