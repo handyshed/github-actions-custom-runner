@@ -33,10 +33,42 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
 # The actual browser binaries will be installed by each project's Playwright version
 RUN npx -y playwright install-deps
 
+# Install dependencies needed for GitHub Actions runner
+RUN apt-get update && \
+    apt-get install -y \
+    curl \
+    jq \
+    && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Download and extract GitHub Actions runner
+# Using a specific version for reproducibility
+ARG RUNNER_VERSION=2.325.0
+ARG TARGETARCH
+RUN mkdir -p /runner && \
+    cd /runner && \
+    if [ "$TARGETARCH" = "arm64" ]; then \
+        RUNNER_ARCH="arm64"; \
+    else \
+        RUNNER_ARCH="x64"; \
+    fi && \
+    curl -o actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz -L \
+    https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz && \
+    tar xzf ./actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz && \
+    rm ./actions-runner-linux-${RUNNER_ARCH}-${RUNNER_VERSION}.tar.gz && \
+    chown -R ciuser:ciuser /runner
+
 # Create workspace directory with correct permissions before switching user
 RUN mkdir -p /workspace && chown ciuser:ciuser /workspace
 
+# Copy entrypoint script
+COPY --chown=ciuser:ciuser entrypoint.sh /runner/entrypoint.sh
+RUN chmod +x /runner/entrypoint.sh
+
 # Set user and working directory
 USER ciuser
-WORKDIR /workspace
+WORKDIR /runner
 ENV HOME=/home/ciuser
+
+# Set the entrypoint
+ENTRYPOINT ["/runner/entrypoint.sh"]

@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Runner 1
+  runner-1:
+    image: ghcr.io/handyshed/github-actions-runner:latest
+    container_name: github-runner-1
+    environment:
+      - RUNNER_URL=${RUNNER_URL}
+      - RUNNER_TOKEN=${RUNNER_TOKEN}
+      - RUNNER_NAME=container-runner-1
+      - RUNNER_LABELS=self-hosted,Linux,X64,containerized,playwright
+    restart: unless-stopped
+    # Optional: Mount a volume for persistent work directory
+    # volumes:
+    #   - runner1-work:/workspace
+
+  # Runner 2
+  runner-2:
+    image: ghcr.io/handyshed/github-actions-runner:latest
+    container_name: github-runner-2
+    environment:
+      - RUNNER_URL=${RUNNER_URL}
+      - RUNNER_TOKEN=${RUNNER_TOKEN}
+      - RUNNER_NAME=container-runner-2
+      - RUNNER_LABELS=self-hosted,Linux,X64,containerized,playwright
+    restart: unless-stopped
+    # volumes:
+    #   - runner2-work:/workspace
+
+  # Runner 3
+  runner-3:
+    image: ghcr.io/handyshed/github-actions-runner:latest
+    container_name: github-runner-3
+    environment:
+      - RUNNER_URL=${RUNNER_URL}
+      - RUNNER_TOKEN=${RUNNER_TOKEN}
+      - RUNNER_NAME=container-runner-3
+      - RUNNER_LABELS=self-hosted,Linux,X64,containerized,playwright
+    restart: unless-stopped
+    # volumes:
+    #   - runner3-work:/workspace
+
+# Optional: Define volumes for persistent storage
+# volumes:
+#   runner1-work:
+#   runner2-work:
+#   runner3-work:
