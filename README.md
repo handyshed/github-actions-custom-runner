@@ -117,6 +117,7 @@ This image includes:
 - **System dependencies** for Playwright browsers (libgtk, libnss3, etc.)
 - Common build tools
 - Node.js and npm
+- GitHub CLI (`gh`) for GitHub API interactions
 
 **Note**: The actual Playwright browser binaries are NOT pre-installed. Each project will download the specific browser versions it needs when running `npm install`. This ensures compatibility with different Playwright versions while still saving time on system dependency installation.
 

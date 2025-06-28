@@ -125,4 +125,7 @@ jobs:
           # Test npm is available
           docker run --rm test-runner:latest npm --version
           
+          # Test GitHub CLI is available
+          docker run --rm test-runner:latest gh --version
+          
           echo "✅ All tests passed!"
