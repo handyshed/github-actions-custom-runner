@@ -102,10 +102,12 @@ docker build --build-arg USER_UID=20001 --build-arg USER_GID=20001 -t custom-run
 
 ## Pre-installed Dependencies
 
-This image includes system dependencies for:
-- Playwright (Chromium, Firefox, WebKit)
+This image includes:
+- **System dependencies** for Playwright browsers (libgtk, libnss3, etc.)
 - Common build tools
 - Node.js and npm
+
+**Note**: The actual Playwright browser binaries are NOT pre-installed. Each project will download the specific browser versions it needs when running `npm install`. This ensures compatibility with different Playwright versions while still saving time on system dependency installation.
 
 ## Troubleshooting
 

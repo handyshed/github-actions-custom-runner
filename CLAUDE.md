@@ -38,11 +38,13 @@ The UID 10001 was selected because:
 
 ### Pre-installed Dependencies
 
-Playwright system dependencies are installed during the image build because:
-- Saves approximately 2-3 minutes per workflow run
-- These dependencies rarely change between runs
-- Trade-off: Larger image size (~200MB extra) for significantly faster CI/CD
-- Includes dependencies for Chromium, Firefox, and WebKit
+Only Playwright system dependencies (NOT browsers) are installed during the image build because:
+- Saves approximately 1-2 minutes per workflow run (apt-get install is slow)
+- System dependencies (libgtk, libnss3, etc.) rarely change
+- Browser binaries change with each Playwright version
+- Each project installs its own Playwright version with matching browsers
+- Trade-off: Slightly larger image size for faster dependency installation
+- Supports all Playwright browsers (Chromium, Firefox, WebKit)
 
 ## External Interface Requirements
 
@@ -85,9 +87,12 @@ useradd -u 10001 -m -s /bin/bash runner
 
 ### 2. Playwright Browser Download
 
-**Symptom**: Playwright tries to download browsers on every run
-**Cause**: Browser binaries aren't included (only system deps)
-**Solution**: Cache `~/.cache/ms-playwright` in your workflow or pre-install in a derived image
+**Symptom**: Playwright downloads browsers on first run
+**Cause**: Browser binaries aren't included (only system deps) - this is by design
+**Solution**: This is expected behavior. Each project needs its own browser versions. To speed up:
+- Cache `node_modules` in your workflow
+- Or cache `~/.cache/ms-playwright` directory
+- System deps are already installed, so only browser download is needed
 
 ### 3. Slow Initial Pull
 

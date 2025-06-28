@@ -15,8 +15,9 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Playwright system dependencies during build
-# This saves time during CI/CD runs
+# Install Playwright system dependencies (NOT the browsers themselves)
+# This saves time during CI/CD runs as apt-get install is slow
+# The actual browser binaries will be installed by each project's Playwright version
 RUN npx -y playwright install-deps
 
 # Set user and working directory
