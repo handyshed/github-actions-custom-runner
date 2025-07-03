@@ -6,32 +6,38 @@ set -e
 
 echo "Checking externals directory initialization..."
 
+# Check if already initialized first
+if [ -f "/home/runner/externals/.initialized" ]; then
+    echo "Externals directory already initialized"
+    
 # Try to create lock directory atomically
-if mkdir "/home/runner/externals/.initializing" 2>/dev/null; then
+elif mkdir "/home/runner/externals/.initializing" 2>/dev/null; then
     echo "Acquired initialization lock - initializing externals directory..."
     
-    # We got the exclusive lock - initialize the directory
-    if [ -d "/home/runner/externals-template" ]; then
-        echo "Copying toolcache from template to mounted externals directory..."
-        cp -r /home/runner/externals-template/* /home/runner/externals/
+    # Double-check we still need to initialize (race condition protection)
+    if [ ! -f "/home/runner/externals/.initialized" ]; then
+        # We got the exclusive lock - initialize the directory
+        if [ -d "/home/runner/externals-template" ] && [ "$(ls -A /home/runner/externals-template 2>/dev/null)" ]; then
+            echo "Copying toolcache from template to mounted externals directory..."
+            cp -r /home/runner/externals-template/* /home/runner/externals/ 2>/dev/null || true
+            
+            # Ensure proper ownership
+            chown -R runner:docker /home/runner/externals/ 2>/dev/null || true
+            
+            echo "Externals initialization complete"
+        else
+            echo "Warning: externals-template directory not found or empty"
+        fi
         
-        # Ensure proper ownership
-        chown -R runner:docker /home/runner/externals/
-        
-        # Mark initialization as complete
+        # Mark initialization as complete (do this last)
         touch "/home/runner/externals/.initialized"
-        echo "Externals initialization complete"
     else
-        echo "Warning: externals-template directory not found"
-        touch "/home/runner/externals/.initialized"
+        echo "Externals directory was initialized by another container during lock acquisition"
     fi
     
     # Release the lock
-    rmdir "/home/runner/externals/.initializing"
+    rmdir "/home/runner/externals/.initializing" 2>/dev/null || true
     echo "Released initialization lock"
-    
-elif [ -f "/home/runner/externals/.initialized" ]; then
-    echo "Externals directory already initialized"
     
 else
     # Another container is initializing - wait for completion
@@ -42,10 +48,16 @@ else
     elapsed=0
     
     while [ ! -f "/home/runner/externals/.initialized" ] && [ $elapsed -lt $timeout ]; do
+        # Check if lock directory still exists (initializer might have failed)
+        if [ ! -d "/home/runner/externals/.initializing" ]; then
+            echo "Lock directory disappeared, retrying initialization..."
+            exec "$0"  # Restart the script
+        fi
+        
         sleep 1
         elapsed=$((elapsed + 1))
         
-        if [ $((elapsed % 10)) -eq 0 ]; then
+        if [ $((elapsed % 5)) -eq 0 ]; then
             echo "Still waiting for externals initialization... (${elapsed}s)"
         fi
     done
