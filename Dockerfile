@@ -27,6 +27,10 @@ RUN apt-get update && \
 # The actual browser binaries will be installed by each project's Playwright version
 RUN npx -y playwright install-deps
 
+# Create symbolic link so GitHub Actions can find the external tools at /__e
+# The official runner image has Node.js 20 at /home/runner/externals/node20/bin/node
+RUN ln -s /home/runner/externals /__e
+
 # Copy entrypoint script
 COPY entrypoint.sh /home/runner/entrypoint.sh
 RUN chmod +x /home/runner/entrypoint.sh
