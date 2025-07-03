@@ -13,15 +13,53 @@ Self-contained Docker image for GitHub Actions self-hosted runners with pre-inst
 
 ## Quick Start
 
+### Prerequisites
+
+This containerized runner requires a host-mounted directory for the GitHub Actions toolcache. Create the directory first:
+
+```bash
+# Create externals directory on host
+sudo mkdir -p /home/runner/externals
+sudo chown -R $(id -u):$(id -g) /home/runner/externals
+```
+
 ### Single Runner
 
 ```bash
 docker run -d \
   --name github-runner \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /home/runner/externals:/home/runner/externals \
   -e RUNNER_URL="https://github.com/YOUR_ORG/YOUR_REPO" \
   -e RUNNER_TOKEN="YOUR_REGISTRATION_TOKEN" \
   -e RUNNER_NAME="docker-runner-1" \
   -e RUNNER_LABELS="self-hosted,Linux,X64,containerized" \
+  ghcr.io/handyshed/github-actions-runner:latest
+```
+
+### Multiple Runners (Shared Toolcache)
+
+Multiple runners can share the same externals directory for efficiency:
+
+```bash
+# Runner 1
+docker run -d \
+  --name github-runner-1 \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /home/runner/externals:/home/runner/externals \
+  -e RUNNER_URL="https://github.com/YOUR_ORG/YOUR_REPO" \
+  -e RUNNER_TOKEN="YOUR_REGISTRATION_TOKEN" \
+  -e RUNNER_NAME="docker-runner-1" \
+  ghcr.io/handyshed/github-actions-runner:latest
+
+# Runner 2
+docker run -d \
+  --name github-runner-2 \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /home/runner/externals:/home/runner/externals \
+  -e RUNNER_URL="https://github.com/YOUR_ORG/YOUR_REPO" \
+  -e RUNNER_TOKEN="YOUR_REGISTRATION_TOKEN" \
+  -e RUNNER_NAME="docker-runner-2" \
   ghcr.io/handyshed/github-actions-runner:latest
 ```
 
@@ -38,10 +76,7 @@ RUNNER_TOKEN=YOUR_REGISTRATION_TOKEN
 docker-compose up -d
 ```
 
-This will start 3 runners by default. Scale as needed:
-```bash
-docker-compose up -d --scale runner-1=5
-```
+This will start 3 runners by default, all sharing the same toolcache for efficiency.
 
 ## Environment Variables
 

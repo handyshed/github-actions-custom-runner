@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+# Initialize externals directory (thread-safe)
+echo "Initializing GitHub Actions toolcache..."
+/usr/local/bin/init-externals.sh
+
 # Check required environment variables
 if [ -z "${RUNNER_URL}" ]; then
     echo "Error: RUNNER_URL environment variable is required"

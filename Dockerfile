@@ -27,13 +27,17 @@ RUN apt-get update && \
 # The actual browser binaries will be installed by each project's Playwright version
 RUN npx -y playwright install-deps
 
-# Create symbolic link so GitHub Actions can find the external tools at /__e
-# The official runner image has Node.js 20 at /home/runner/externals/node20/bin/node
-RUN ln -s /home/runner/externals /__e
+# Set up externals template system for host mounting
+# Move built-in externals to template location, create empty externals for mounting
+RUN mv /home/runner/externals /home/runner/externals-template && \
+    mkdir -p /home/runner/externals && \
+    chown runner:docker /home/runner/externals
 
-# Copy entrypoint script
+# Copy initialization and entrypoint scripts
+COPY init-externals.sh /usr/local/bin/init-externals.sh
 COPY entrypoint.sh /home/runner/entrypoint.sh
-RUN chmod +x /home/runner/entrypoint.sh
+RUN chmod +x /usr/local/bin/init-externals.sh && \
+    chmod +x /home/runner/entrypoint.sh
 
 # Switch back to runner user and set working directory
 USER runner

@@ -10,10 +10,10 @@ services:
       - RUNNER_TOKEN=${RUNNER_TOKEN}
       - RUNNER_NAME=container-runner-1
       - RUNNER_LABELS=self-hosted,Linux,X64,containerized,playwright
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/runner/externals:/home/runner/externals
     restart: unless-stopped
-    # Optional: Mount a volume for persistent work directory
-    # volumes:
-    #   - runner1-work:/workspace
 
   # Runner 2
   runner-2:
@@ -24,9 +24,10 @@ services:
       - RUNNER_TOKEN=${RUNNER_TOKEN}
       - RUNNER_NAME=container-runner-2
       - RUNNER_LABELS=self-hosted,Linux,X64,containerized,playwright
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/runner/externals:/home/runner/externals
     restart: unless-stopped
-    # volumes:
-    #   - runner2-work:/workspace
 
   # Runner 3
   runner-3:
@@ -37,12 +38,10 @@ services:
       - RUNNER_TOKEN=${RUNNER_TOKEN}
       - RUNNER_NAME=container-runner-3
       - RUNNER_LABELS=self-hosted,Linux,X64,containerized,playwright
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/runner/externals:/home/runner/externals
     restart: unless-stopped
-    # volumes:
-    #   - runner3-work:/workspace
 
-# Optional: Define volumes for persistent storage
-# volumes:
-#   runner1-work:
-#   runner2-work:
-#   runner3-work:
+# Note: All runners share the same host externals directory for efficiency
+# The first runner to start will initialize the toolcache for all others
